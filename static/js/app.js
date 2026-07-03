@@ -5,6 +5,63 @@ const grid = document.querySelector("#project-grid");
 const template = document.querySelector("#project-template");
 const filters = document.querySelector("#filters");
 const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const languageSwitcher = document.querySelector(".language-switcher");
+const previewObserver = new IntersectionObserver((entries, observer) => {
+  entries.forEach((entry) => {
+    if (!entry.isIntersecting) return;
+    const preview = entry.target;
+    const iframe = document.createElement("iframe");
+    iframe.src = preview.dataset.src;
+    iframe.title = `${preview.dataset.name} live preview`;
+    iframe.loading = "lazy";
+    iframe.tabIndex = -1;
+    iframe.setAttribute("sandbox", "allow-scripts allow-same-origin");
+    preview.append(iframe);
+    observer.unobserve(preview);
+  });
+}, { rootMargin: "180px 0px" });
+
+const translations = {
+  en: {
+    "nav.projects": "Projects", "nav.about": "About", "nav.contact": "Contact",
+    "hero.copy": "I build web products, games and interfaces made to be explored.",
+    "hero.button": "Explore<br>projects",
+    "about.eyebrow": "02 — ABOUT ME", "about.title": "Code is a<br><em>material.</em>",
+    "about.copy1": "I turn ideas into working digital products — from Python logic to expressive interfaces and game mechanics.",
+    "about.copy2": "I love projects where engineering meets a strong visual character.",
+    "about.link": "Explore my GitHub", "projects.title": "Projects",
+    "projects.count": "selected works<br>from GitHub", "projects.all": "All",
+    "contact.title": "Got an idea?<br><span>Let's bring it to life.</span>",
+    "contact.copy": "Open to meaningful projects, collaboration and new experiments.",
+    "contact.button": "Contact via GitHub"
+  },
+  ru: {
+    "nav.projects": "Проекты", "nav.about": "Обо мне", "nav.contact": "Контакты",
+    "hero.copy": "Создаю веб-продукты, игры и интерфейсы, которые хочется исследовать.",
+    "hero.button": "Смотреть<br>проекты",
+    "about.eyebrow": "02 — ОБО МНЕ", "about.title": "Код — это<br><em>материал.</em>",
+    "about.copy1": "Превращаю идеи в работающие цифровые продукты: от логики на Python до выразительных интерфейсов и игровых механик.",
+    "about.copy2": "Люблю проекты, где инженерия встречается с визуальным характером.",
+    "about.link": "Исследовать мой GitHub", "projects.title": "Проекты",
+    "projects.count": "избранных работ<br>из GitHub", "projects.all": "Все",
+    "contact.title": "Есть идея?<br><span>Давайте оживим.</span>",
+    "contact.copy": "Открыт для интересных проектов, командной работы и новых экспериментов.",
+    "contact.button": "Связаться через GitHub"
+  },
+  pl: {
+    "nav.projects": "Projekty", "nav.about": "O mnie", "nav.contact": "Kontakt",
+    "hero.copy": "Tworzę produkty internetowe, gry i interfejsy, które chce się odkrywać.",
+    "hero.button": "Zobacz<br>projekty",
+    "about.eyebrow": "02 — O MNIE", "about.title": "Kod jest<br><em>materiałem.</em>",
+    "about.copy1": "Zmieniam pomysły w działające produkty cyfrowe — od logiki w Pythonie po wyraziste interfejsy i mechaniki gier.",
+    "about.copy2": "Lubię projekty, w których inżynieria spotyka się z mocnym charakterem wizualnym.",
+    "about.link": "Zobacz mój GitHub", "projects.title": "Projekty",
+    "projects.count": "wybranych prac<br>z GitHuba", "projects.all": "Wszystkie",
+    "contact.title": "Masz pomysł?<br><span>Ożywmy go razem.</span>",
+    "contact.copy": "Jestem otwarty na ciekawe projekty, współpracę i nowe eksperymenty.",
+    "contact.button": "Kontakt przez GitHub"
+  }
+};
 
 document.querySelector("#year").textContent = new Date().getFullYear();
 
@@ -42,10 +99,28 @@ async function loadProjects() {
 function renderFilters() {
   const languages = [...new Set(state.projects.map((project) => project.language).filter(Boolean))].slice(0, 6);
   filters.innerHTML = [
-    '<button class="active" type="button" data-filter="all">Все</button>',
+    `<button class="active" type="button" data-filter="all">${translations[document.documentElement.lang]["projects.all"]}</button>`,
     ...languages.map((language) => `<button type="button" data-filter="${escapeHtml(language)}">${escapeHtml(language)}</button>`)
   ].join("");
 }
+
+function setLanguage(language) {
+  if (!translations[language]) return;
+  document.documentElement.lang = language;
+  document.querySelectorAll("[data-i18n]").forEach((element) => {
+    const value = translations[language][element.dataset.i18n];
+    if (value) element.innerHTML = value;
+  });
+  languageSwitcher.querySelector(".active")?.classList.remove("active");
+  languageSwitcher.querySelector(`[data-lang="${language}"]`)?.classList.add("active");
+  if (state.projects.length) renderFilters();
+  localStorage.setItem("portfolio-language", language);
+}
+
+languageSwitcher.addEventListener("click", (event) => {
+  const button = event.target.closest("[data-lang]");
+  if (button) setLanguage(button.dataset.lang);
+});
 
 function renderProjects() {
   grid.innerHTML = "";
@@ -79,9 +154,14 @@ function renderProjects() {
     const demoLink = card.querySelector(".demo-link");
     if (project.homepage) {
       demoLink.href = project.homepage;
-      demoLink.textContent = "Demo ↗";
+      const preview = card.querySelector(".live-preview");
+      preview.dataset.src = project.homepage;
+      preview.dataset.name = project.name;
+      previewObserver.observe(preview);
     } else {
       demoLink.remove();
+      card.querySelector(".live-preview").remove();
+      card.querySelector(".preview-badge").remove();
     }
 
     if (!reducedMotion) setupCardTilt(card);
@@ -190,5 +270,6 @@ function initSpace() {
   animate();
 }
 
+setLanguage(localStorage.getItem("portfolio-language") || "en");
 if (!reducedMotion) initSpace();
 loadProjects();

@@ -13,6 +13,14 @@ from flask import Flask, jsonify, render_template
 GITHUB_USER = "AndreiPabiarzhyn"
 CACHE_FILE = Path("/tmp/portfolio_github_cache.json")
 CACHE_TTL = 60 * 30
+FEATURED_PROJECTS = [
+    "lumitra",
+    "clone-piskel-gif-anim",
+    "roblox-game-m4l1-aura",
+    "kodland-animator-lab-andrei-pabiarzhyn",
+    "funtech-cyber-defense-game-m19",
+    "blockly-loops-robot-game",
+]
 
 FALLBACK_PROJECTS = [
     {
@@ -49,7 +57,7 @@ def create_app() -> Flask:
 
     @app.get("/api/projects")
     def projects():
-        return jsonify(get_projects())
+        return jsonify(select_featured_projects(get_projects()))
 
     @app.get("/api/health")
     def health():
@@ -96,7 +104,7 @@ def get_projects() -> list[dict]:
 def normalize_project(repository: dict) -> dict:
     return {
         "name": repository.get("name", "Untitled"),
-        "description": repository.get("description") or "Проект в разработке — детали на GitHub.",
+        "description": repository.get("description") or "A project in active development — explore the details on GitHub.",
         "html_url": repository.get("html_url", ""),
         "homepage": repository.get("homepage") or "",
         "language": repository.get("language") or "Other",
@@ -105,6 +113,11 @@ def normalize_project(repository: dict) -> dict:
         "forks_count": repository.get("forks_count", 0),
         "pushed_at": repository.get("pushed_at", ""),
     }
+
+
+def select_featured_projects(projects: list[dict]) -> list[dict]:
+    by_name = {project["name"]: project for project in projects}
+    return [by_name[name] for name in FEATURED_PROJECTS if name in by_name]
 
 
 def read_cache() -> list[dict] | None:
