@@ -30,7 +30,7 @@
       "@type": "Person",
       "name": "Andrei Pabiarzhyn",
       "url": "{{ request.url_root }}",
-      "image": "{{ url_for('static', filename='images/avatar.jpg', _external=True) }}",
+      "image": "{{ url_for('static', filename='images/avatar-game.jpg', _external=True) }}",
       "jobTitle": "Software Developer & Programming Educator",
       "worksFor": {"@type": "Organization", "name": "Kodland"},
       "sameAs": ["https://github.com/{{ github_user }}"],
@@ -70,14 +70,16 @@
         <span>PYTHON</span><span>FLASK</span><span>CREATIVE DEV</span>
       </div>
       <aside class="hero-profile reveal">
-        <div class="avatar-shell">
-          <img src="{{ url_for('static', filename='images/avatar.jpg') }}" alt="Portrait of Andrei Pabiarzhyn" width="180" height="180">
+        <button class="avatar-shell" id="game-launch" type="button" aria-haspopup="dialog" aria-controls="mind-runner" title="Play Mind Runner">
+          <img src="{{ url_for('static', filename='images/avatar-game.jpg') }}" alt="Illustrated portrait of Andrei Pabiarzhyn" width="180" height="180">
           <span></span>
-        </div>
+          <b>▶</b>
+        </button>
         <div>
           <strong>Andrei Pabiarzhyn</strong>
           <p data-i18n="profile.location">Europe / Remote</p>
           <small><i></i><span data-i18n="profile.status">Available for selected projects</span></small>
+          <button class="play-label" id="game-launch-label" type="button" data-i18n="game.play">Play Mind Runner ↗</button>
         </div>
       </aside>
       <p class="eyebrow reveal">01 — HELLO, WORLD</p>
@@ -290,6 +292,71 @@
       </footer>
     </section>
   </main>
+
+  <div class="game-modal" id="mind-runner" role="dialog" aria-modal="true" aria-labelledby="game-title" hidden>
+    <div class="game-backdrop" data-game-close></div>
+    <section class="game-console">
+      <header class="game-header">
+        <div>
+          <span class="game-kicker">INTERACTIVE SKILL QUEST</span>
+          <h2 id="game-title">Mind Runner</h2>
+        </div>
+        <div class="game-levels" aria-label="Game progress">
+          <i class="active">1</i><i>2</i><i>3</i>
+        </div>
+        <button class="game-close" type="button" data-game-close aria-label="Close game">×</button>
+      </header>
+
+      <div class="game-intro" data-game-screen="intro">
+        <div class="game-avatar">
+          <img src="{{ url_for('static', filename='images/avatar-game.jpg') }}" alt="" width="420" height="420">
+          <span></span>
+        </div>
+        <div class="game-intro-copy">
+          <p class="game-overline">DEVELOPER × EDUCATOR × AI EXPLORER</p>
+          <h3>Three challenges.<br>Three useful insights.</h3>
+          <p>Test focus, pattern recognition and Python logic in a 90-second cognitive run.</p>
+          <div class="game-skill-list"><span>Reaction</span><span>Memory</span><span>Logic</span></div>
+          <button class="game-primary" type="button" data-game-start>Start the run <b>→</b></button>
+        </div>
+      </div>
+
+      <div class="game-play" data-game-screen="play" hidden>
+        <div class="game-stage-head">
+          <div><span class="game-stage-number">LEVEL 01</span><h3 class="game-stage-title">Focus Field</h3></div>
+          <p class="game-instruction">Move the pointer. Collect green signals and avoid violet noise.</p>
+          <strong class="game-score">0 / 5</strong>
+        </div>
+        <div class="game-canvas-shell">
+          <canvas id="game-canvas" width="960" height="460"></canvas>
+          <div class="game-countdown" hidden>3</div>
+        </div>
+        <div class="game-answers" hidden></div>
+        <p class="game-controls">MOUSE / TOUCH · SPACE TO JUMP · ESC TO CLOSE</p>
+      </div>
+
+      <div class="game-wisdom" data-game-screen="wisdom" hidden>
+        <div class="reward-rays" aria-hidden="true"><i></i><i></i><i></i></div>
+        <span class="wisdom-icon">✦</span>
+        <p class="game-overline">KNOWLEDGE UNLOCKED</p>
+        <strong class="wisdom-reward"></strong>
+        <h3 class="wisdom-title"></h3>
+        <p class="wisdom-text"></p>
+        <button class="game-primary" type="button" data-game-next>Next level <b>→</b></button>
+      </div>
+
+      <div class="game-finish" data-game-screen="finish" hidden>
+        <div class="finish-orbit"><img src="{{ url_for('static', filename='images/avatar-game.jpg') }}" alt="" width="280" height="280"><i></i><i></i><i></i></div>
+        <p class="game-overline">RUN COMPLETE</p>
+        <h3>Developer × Educator<br>× AI Explorer</h3>
+        <p class="finish-stats"></p>
+        <div class="finish-actions">
+          <a class="game-primary" href="#projects" data-game-close>Explore projects <b>↓</b></a>
+          <button class="game-secondary" type="button" data-game-restart>Play again</button>
+        </div>
+      </div>
+    </section>
+  </div>
 
   <template id="project-template">
     <article class="project-card reveal">

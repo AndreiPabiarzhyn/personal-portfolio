@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { initMindRunner } from "./game.js";
 
 const state = { projects: [], filter: "all", language: "en" };
 const grid = document.querySelector("#project-grid");
@@ -10,6 +11,7 @@ const translations = {
   en: {
     "nav.projects": "Projects", "nav.skills": "Skills", "nav.about": "About", "nav.contact": "Contact",
     "profile.location": "Europe / Remote", "profile.status": "Available for selected projects",
+    "game.play": "Play Mind Runner ↗",
     "case.task": "Task", "case.role": "Role", "case.result": "Result",
     "hero.copy": "I build web products, games and interfaces made to be explored.",
     "hero.button": "Explore<br>projects",
@@ -42,6 +44,7 @@ const translations = {
   ru: {
     "nav.projects": "Проекты", "nav.skills": "Навыки", "nav.about": "Обо мне", "nav.contact": "Контакты",
     "profile.location": "Европа / Удалённо", "profile.status": "Открыт для избранных проектов",
+    "game.play": "Играть в Mind Runner ↗",
     "case.task": "Задача", "case.role": "Роль", "case.result": "Результат",
     "hero.copy": "Создаю веб-продукты, игры и интерфейсы, которые хочется исследовать.",
     "hero.button": "Смотреть<br>проекты",
@@ -49,7 +52,7 @@ const translations = {
     "about.copy1": "Превращаю идеи в работающие цифровые продукты: от логики на Python до выразительных интерфейсов и игровых механик.",
     "about.copy2": "Люблю проекты, где инженерия встречается с визуальным характером.",
     "about.link": "Исследовать мой GitHub", "projects.title": "Проекты",
-    "skills.eyebrow": "03 — ВОЗМОЖНОСТИ", "skills.title": "Мой творческий<br><em>инструментарий.</em>",
+    "skills.eyebrow": "03 — ВОЗМОЖНОСТИ", "skills.title": "Мой набор<br><em>инструментов.</em>",
     "skills.intro": "Практический стек, чтобы провести идею от первого прототипа до отполированного продукта в интернете.",
     "skills.hint": "Нажми — там больше",
     "skills.programming": "Программирование", "skills.programmingCopy": "Создаю логику веб-приложений, инструментов и автоматизированных систем.",
@@ -74,6 +77,7 @@ const translations = {
   pl: {
     "nav.projects": "Projekty", "nav.skills": "Umiejętności", "nav.about": "O mnie", "nav.contact": "Kontakt",
     "profile.location": "Europa / Zdalnie", "profile.status": "Dostępny dla wybranych projektów",
+    "game.play": "Zagraj w Mind Runner ↗",
     "case.task": "Zadanie", "case.role": "Rola", "case.result": "Rezultat",
     "hero.copy": "Tworzę produkty internetowe, gry i interfejsy, które chce się odkrywać.",
     "hero.button": "Zobacz<br>projekty",
@@ -293,6 +297,45 @@ function initSpace() {
   renderer.setPixelRatio(Math.min(devicePixelRatio, pixelRatioCap));
   renderer.setSize(innerWidth, innerHeight);
 
+  const auroraMaterial = new THREE.ShaderMaterial({
+    transparent: true,
+    depthWrite: false,
+    uniforms: {
+      uTime: { value: 0 },
+      uPointer: { value: new THREE.Vector2() },
+    },
+    vertexShader: `
+      uniform float uTime;
+      varying vec2 vUv;
+      void main() {
+        vUv = uv;
+        vec3 p = position;
+        p.z += sin(p.x * 0.72 + uTime * 0.35) * 0.34;
+        p.z += cos(p.y * 0.58 - uTime * 0.26) * 0.22;
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(p, 1.0);
+      }
+    `,
+    fragmentShader: `
+      uniform float uTime;
+      uniform vec2 uPointer;
+      varying vec2 vUv;
+      void main() {
+        vec2 uv = vUv - 0.5;
+        float wave = sin((uv.x + uv.y) * 8.0 + uTime * 0.4) * 0.5 + 0.5;
+        float glow = smoothstep(0.72, 0.02, length(uv - uPointer * 0.08));
+        vec3 acid = vec3(0.78, 1.0, 0.22);
+        vec3 violet = vec3(0.42, 0.28, 0.78);
+        vec3 color = mix(violet, acid, wave);
+        float alpha = glow * (0.018 + wave * 0.025);
+        gl_FragColor = vec4(color, alpha);
+      }
+    `,
+  });
+  const aurora = new THREE.Mesh(new THREE.PlaneGeometry(20, 13, 36, 24), auroraMaterial);
+  aurora.position.z = -6.5;
+  aurora.rotation.z = -0.08;
+  scene.add(aurora);
+
   const particleCount = lowPower ? 520 : 1400;
   const positions = new Float32Array(particleCount * 3);
   const colors = new Float32Array(particleCount * 3);
@@ -313,7 +356,7 @@ function initSpace() {
   const geometry = new THREE.BufferGeometry();
   geometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
   geometry.setAttribute("color", new THREE.BufferAttribute(colors, 3));
-  const material = new THREE.PointsMaterial({ size: 0.025, vertexColors: true, transparent: true, opacity: 0.7 });
+  const material = new THREE.PointsMaterial({ size: 0.023, vertexColors: true, transparent: true, opacity: 0.48 });
   const particles = new THREE.Points(geometry, material);
   scene.add(particles);
 
@@ -328,19 +371,20 @@ function initSpace() {
   dustGeometry.setAttribute("position", new THREE.BufferAttribute(dustPositions, 3));
   const dust = new THREE.Points(
     dustGeometry,
-    new THREE.PointsMaterial({ color: 0xeef4e8, size: 0.045, transparent: true, opacity: 0.24 })
+    new THREE.PointsMaterial({ color: 0xeef4e8, size: 0.04, transparent: true, opacity: 0.13 })
   );
   scene.add(dust);
 
   const knot = new THREE.Mesh(
     new THREE.TorusKnotGeometry(1.35, 0.32, 110, 16),
-    new THREE.MeshBasicMaterial({ color: 0x9c7bff, wireframe: true, transparent: true, opacity: 0.15 })
+    new THREE.MeshBasicMaterial({ color: 0x9c7bff, wireframe: true, transparent: true, opacity: 0.07 })
   );
-  knot.position.set(3.7, 0.2, -2);
+  knot.position.set(4.7, 0.2, -3.8);
+  knot.scale.setScalar(0.78);
   scene.add(knot);
 
   const orbitalGroup = new THREE.Group();
-  const nodeMaterial = new THREE.MeshBasicMaterial({ color: 0xc7ff38, wireframe: true, transparent: true, opacity: 0.28 });
+  const nodeMaterial = new THREE.MeshBasicMaterial({ color: 0xc7ff38, wireframe: true, transparent: true, opacity: 0.12 });
   const nodeGeometry = new THREE.IcosahedronGeometry(0.28, 1);
   const nodes = [];
   [
@@ -364,7 +408,7 @@ function initSpace() {
       new THREE.MeshBasicMaterial({
         color: index % 2 ? 0x9c7bff : 0xc7ff38,
         transparent: true,
-        opacity: 0.08,
+        opacity: 0.035,
       })
     );
     ring.rotation.set(Math.PI * (0.25 + index * 0.13), index * 0.55, index * 0.24);
@@ -392,6 +436,9 @@ function initSpace() {
     if (document.hidden) return;
     const time = clock.getElapsedTime();
     const scrollProgress = window.scrollY / Math.max(document.body.scrollHeight - innerHeight, 1);
+    auroraMaterial.uniforms.uTime.value = time;
+    auroraMaterial.uniforms.uPointer.value.set(pointer.x, -pointer.y);
+    aurora.rotation.z = -0.08 + Math.sin(time * 0.08) * 0.025;
     particles.rotation.y = time * 0.018 + scrollProgress * 0.8;
     particles.rotation.x += (pointer.y * 0.035 - particles.rotation.x) * 0.015;
     dust.rotation.y = -time * 0.025;
@@ -422,5 +469,6 @@ function initSpace() {
 }
 
 setLanguage(localStorage.getItem("portfolio-language") || "en");
+initMindRunner();
 if (!reducedMotion) initSpace();
 loadProjects();
