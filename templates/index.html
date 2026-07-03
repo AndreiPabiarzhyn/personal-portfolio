@@ -5,7 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#080b0a">
   <meta name="description" content="Andrei Pabiarzhyn — creative developer building web products, games and interactive experiences.">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Andrei Pabiarzhyn — Creative Developer">
+  <meta property="og:description" content="Web products, educational technology, games and AI-assisted development.">
+  <meta property="og:image" content="{{ url_for('static', filename='images/og-cover.jpg', _external=True) }}">
+  <meta property="og:url" content="{{ request.url }}">
+  <meta name="twitter:card" content="summary_large_image">
   <title>Andrei Pabiarzhyn — Creative Developer</title>
+  <link rel="icon" href="{{ url_for('static', filename='images/favicon.svg') }}" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Unbounded:wght@500;600;700&display=swap" rel="stylesheet">
@@ -17,8 +24,22 @@
       }
     }
   </script>
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Person",
+      "name": "Andrei Pabiarzhyn",
+      "url": "{{ request.url_root }}",
+      "image": "{{ url_for('static', filename='images/avatar.jpg', _external=True) }}",
+      "jobTitle": "Software Developer & Programming Educator",
+      "worksFor": {"@type": "Organization", "name": "Kodland"},
+      "sameAs": ["https://github.com/{{ github_user }}"],
+      "knowsAbout": ["Python", "JavaScript", "TypeScript", "React", "Roblox Studio", "Artificial Intelligence", "Educational Technology"]
+    }
+  </script>
 </head>
 <body>
+  <div class="scroll-progress" aria-hidden="true"><span></span></div>
   <div class="noise" aria-hidden="true"></div>
   <canvas id="space" aria-hidden="true"></canvas>
 
@@ -48,6 +69,17 @@
       <div class="hero-orbit" aria-hidden="true">
         <span>PYTHON</span><span>FLASK</span><span>CREATIVE DEV</span>
       </div>
+      <aside class="hero-profile reveal">
+        <div class="avatar-shell">
+          <img src="{{ url_for('static', filename='images/avatar.jpg') }}" alt="Portrait of Andrei Pabiarzhyn" width="180" height="180">
+          <span></span>
+        </div>
+        <div>
+          <strong>Andrei Pabiarzhyn</strong>
+          <p data-i18n="profile.location">Europe / Remote</p>
+          <small><i></i><span data-i18n="profile.status">Available for selected projects</span></small>
+        </div>
+      </aside>
       <p class="eyebrow reveal">01 — HELLO, WORLD</p>
       <h1 class="hero-title reveal">
         <span>Andrei</span>
@@ -87,29 +119,123 @@
       </div>
 
       <div class="skills-console">
-        <article class="skill-panel reveal">
-          <div class="skill-panel-top"><span>01</span><i></i><span data-i18n="skills.backend">BACKEND / LOGIC</span></div>
-          <h3>Python<br>Flask</h3>
-          <p data-i18n="skills.backendCopy">APIs, server-side rendering, automation and application architecture.</p>
-          <div class="skill-meter"><span style="--level: 92%"></span></div>
+        <article class="skill-card reveal" tabindex="0" role="button" aria-expanded="false">
+          <div class="skill-card-inner">
+            <div class="skill-face skill-front">
+              <div class="skill-panel-top"><span>01</span><i></i><span>CORE</span></div>
+              <span class="skill-symbol">&lt;/&gt;</span>
+              <h3 data-i18n="skills.programming">Programming</h3>
+              <p data-i18n="skills.programmingCopy">I build the logic behind web apps, tools and automated systems.</p>
+              <span class="flip-hint"><b>↻</b> <span data-i18n="skills.hint">Click to explore</span></span>
+            </div>
+            <div class="skill-face skill-back">
+              <div class="skill-panel-top"><span>01</span><i></i><span data-i18n="skills.programming">Programming</span></div>
+              <div class="skill-tags"><span>Python</span><span>JavaScript ES6+</span><span>TypeScript</span><span>HTML5</span><span>CSS3</span><span>SQL</span><span>REST APIs</span><span>JSON</span></div>
+              <p data-i18n="skills.programmingBack">Architecture, APIs, data handling and maintainable production code.</p>
+            </div>
+          </div>
         </article>
-        <article class="skill-panel reveal">
-          <div class="skill-panel-top"><span>02</span><i></i><span data-i18n="skills.frontend">FRONTEND / UI</span></div>
-          <h3>JavaScript<br>TypeScript</h3>
-          <p data-i18n="skills.frontendCopy">Responsive interfaces, state, browser APIs and thoughtful interactions.</p>
-          <div class="skill-meter"><span style="--level: 88%"></span></div>
+
+        <article class="skill-card reveal" tabindex="0" role="button" aria-expanded="false">
+          <div class="skill-card-inner">
+            <div class="skill-face skill-front">
+              <div class="skill-panel-top"><span>02</span><i></i><span>INTERFACE</span></div>
+              <span class="skill-symbol">UI</span>
+              <h3 data-i18n="skills.frontend">Frontend</h3>
+              <p data-i18n="skills.frontendCopy">I craft responsive browser products with clear UX and expressive motion.</p>
+              <span class="flip-hint"><b>↻</b> <span data-i18n="skills.hint">Click to explore</span></span>
+            </div>
+            <div class="skill-face skill-back">
+              <div class="skill-panel-top"><span>02</span><i></i><span data-i18n="skills.frontend">Frontend</span></div>
+              <div class="skill-tags"><span>React</span><span>Zustand</span><span>PixiJS</span><span>Vite</span><span>Responsive Design</span><span>Canvas API</span><span>DOM</span><span>UI/UX</span></div>
+              <p data-i18n="skills.frontendBack">Component systems, interactive canvas experiences and cross-browser interfaces.</p>
+            </div>
+          </div>
         </article>
-        <article class="skill-panel reveal">
-          <div class="skill-panel-top"><span>03</span><i></i><span data-i18n="skills.creative">CREATIVE / 3D</span></div>
-          <h3>Three.js<br>WebGL</h3>
-          <p data-i18n="skills.creativeCopy">Real-time scenes, motion systems, particles and immersive web experiences.</p>
-          <div class="skill-meter"><span style="--level: 78%"></span></div>
+
+        <article class="skill-card reveal" tabindex="0" role="button" aria-expanded="false">
+          <div class="skill-card-inner">
+            <div class="skill-face skill-front">
+              <div class="skill-panel-top"><span>03</span><i></i><span>PLAY</span></div>
+              <span class="skill-symbol">XP</span>
+              <h3 data-i18n="skills.game">Game Development</h3>
+              <p data-i18n="skills.gameCopy">I design playable systems, worlds and interfaces for Roblox experiences.</p>
+              <span class="flip-hint"><b>↻</b> <span data-i18n="skills.hint">Click to explore</span></span>
+            </div>
+            <div class="skill-face skill-back">
+              <div class="skill-panel-top"><span>03</span><i></i><span data-i18n="skills.game">Game Development</span></div>
+              <div class="skill-tags"><span>Roblox Studio</span><span>Luau</span><span>Game Systems</span><span>NPC & Dialogue</span><span>Quests</span><span>Animation</span><span>Economy</span><span>Game Passes</span></div>
+              <p data-i18n="skills.gameBack">Gameplay loops, progression, monetization and polished player-facing UI.</p>
+            </div>
+          </div>
         </article>
-        <article class="skill-panel reveal">
-          <div class="skill-panel-top"><span>04</span><i></i><span data-i18n="skills.product">PRODUCT / SHIP</span></div>
-          <h3>Git<br>Vercel</h3>
-          <p data-i18n="skills.productCopy">Version control, deployment, performance and iterative product delivery.</p>
-          <div class="skill-meter"><span style="--level: 84%"></span></div>
+
+        <article class="skill-card reveal" tabindex="0" role="button" aria-expanded="false">
+          <div class="skill-card-inner">
+            <div class="skill-face skill-front">
+              <div class="skill-panel-top"><span>04</span><i></i><span>INTELLIGENCE</span></div>
+              <span class="skill-symbol">AI</span>
+              <h3 data-i18n="skills.ai">AI & Automation</h3>
+              <p data-i18n="skills.aiCopy">I integrate AI into useful products, assistants and repeatable workflows.</p>
+              <span class="flip-hint"><b>↻</b> <span data-i18n="skills.hint">Click to explore</span></span>
+            </div>
+            <div class="skill-face skill-back">
+              <div class="skill-panel-top"><span>04</span><i></i><span data-i18n="skills.ai">AI & Automation</span></div>
+              <div class="skill-tags"><span>OpenAI API</span><span>Prompt Engineering</span><span>RAG</span><span>LLM Apps</span><span>AI Chatbots</span><span>Workflow Automation</span><span>AI-assisted Dev</span></div>
+              <p data-i18n="skills.aiBack">From prompt design to AI features connected with real application logic.</p>
+            </div>
+          </div>
+        </article>
+
+        <article class="skill-card reveal" tabindex="0" role="button" aria-expanded="false">
+          <div class="skill-card-inner">
+            <div class="skill-face skill-front">
+              <div class="skill-panel-top"><span>05</span><i></i><span>LEARNING</span></div>
+              <span class="skill-symbol">ED</span>
+              <h3 data-i18n="skills.education">Education Technology</h3>
+              <p data-i18n="skills.educationCopy">I turn complex technology into lessons, tools and educational games.</p>
+              <span class="flip-hint"><b>↻</b> <span data-i18n="skills.hint">Click to explore</span></span>
+            </div>
+            <div class="skill-face skill-back">
+              <div class="skill-panel-top"><span>05</span><i></i><span data-i18n="skills.education">Education Technology</span></div>
+              <div class="skill-tags"><span>Curriculum Design</span><span>Lesson Planning</span><span>Educational Games</span><span>Blockly</span><span>Scratch</span><span>Python Education</span><span>Roblox Education</span></div>
+              <p data-i18n="skills.educationBack">Curricula and interactive learning experiences designed for real students.</p>
+            </div>
+          </div>
+        </article>
+
+        <article class="skill-card reveal" tabindex="0" role="button" aria-expanded="false">
+          <div class="skill-card-inner">
+            <div class="skill-face skill-front">
+              <div class="skill-panel-top"><span>06</span><i></i><span>WORKFLOW</span></div>
+              <span class="skill-symbol">GIT</span>
+              <h3 data-i18n="skills.tools">Tools & Delivery</h3>
+              <p data-i18n="skills.toolsCopy">I take work from idea and design through review, release and optimization.</p>
+              <span class="flip-hint"><b>↻</b> <span data-i18n="skills.hint">Click to explore</span></span>
+            </div>
+            <div class="skill-face skill-back">
+              <div class="skill-panel-top"><span>06</span><i></i><span data-i18n="skills.tools">Tools & Delivery</span></div>
+              <div class="skill-tags"><span>Git</span><span>GitHub</span><span>GitHub Pages</span><span>VS Code</span><span>Figma</span><span>npm</span><span>Codex CLI</span><span>Agile</span><span>Performance</span></div>
+              <p data-i18n="skills.toolsBack">Reliable workflows, documentation, QA and performance-minded delivery.</p>
+            </div>
+          </div>
+        </article>
+
+        <article class="skill-card skill-card-wide reveal" tabindex="0" role="button" aria-expanded="false">
+          <div class="skill-card-inner">
+            <div class="skill-face skill-front">
+              <div class="skill-panel-top"><span>07</span><i></i><span>PEOPLE × PRODUCT</span></div>
+              <span class="skill-symbol">↗</span>
+              <h3 data-i18n="skills.leadership">Leadership & Communication</h3>
+              <p data-i18n="skills.leadershipCopy">I help teams understand the problem, raise quality and deliver together.</p>
+              <span class="flip-hint"><b>↻</b> <span data-i18n="skills.hint">Click to explore</span></span>
+            </div>
+            <div class="skill-face skill-back">
+              <div class="skill-panel-top"><span>07</span><i></i><span data-i18n="skills.leadership">Leadership & Communication</span></div>
+              <div class="skill-tags"><span>Problem Solving</span><span>Mentoring</span><span>Technical Leadership</span><span>Quality Assurance</span><span>Communication</span><span>Public Speaking</span><span>Team Collaboration</span><span>Documentation</span></div>
+              <p data-i18n="skills.leadershipBack">Clear communication, practical mentoring and ownership from concept to outcome.</p>
+            </div>
+          </div>
         </article>
       </div>
 
@@ -174,12 +300,16 @@
       <div class="card-visual" aria-hidden="true">
         <div class="visual-grid"></div>
         <span class="visual-letter"></span>
-        <div class="live-preview"></div>
-        <span class="preview-badge"><i></i> LIVE PREVIEW</span>
+        <img class="project-cover" alt="" loading="lazy" width="1200" height="750">
+        <span class="preview-badge"><i></i> PROJECT PREVIEW</span>
       </div>
       <div class="card-body">
         <h3></h3>
-        <p></p>
+        <div class="case-study">
+          <p><b data-i18n="case.task">Task</b><span class="case-task"></span></p>
+          <p><b data-i18n="case.role">Role</b><span class="case-role"></span></p>
+          <p><b data-i18n="case.result">Result</b><span class="case-result"></span></p>
+        </div>
         <div class="card-topics"></div>
       </div>
       <div class="card-footer">

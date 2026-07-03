@@ -1,29 +1,16 @@
 import * as THREE from "three";
 
-const state = { projects: [], filter: "all" };
+const state = { projects: [], filter: "all", language: "en" };
 const grid = document.querySelector("#project-grid");
 const template = document.querySelector("#project-template");
 const filters = document.querySelector("#filters");
 const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 const languageSwitcher = document.querySelector(".language-switcher");
-const previewObserver = new IntersectionObserver((entries, observer) => {
-  entries.forEach((entry) => {
-    if (!entry.isIntersecting) return;
-    const preview = entry.target;
-    const iframe = document.createElement("iframe");
-    iframe.src = preview.dataset.src;
-    iframe.title = `${preview.dataset.name} live preview`;
-    iframe.loading = "lazy";
-    iframe.tabIndex = -1;
-    iframe.setAttribute("sandbox", "allow-scripts allow-same-origin");
-    preview.append(iframe);
-    observer.unobserve(preview);
-  });
-}, { rootMargin: "180px 0px" });
-
 const translations = {
   en: {
     "nav.projects": "Projects", "nav.skills": "Skills", "nav.about": "About", "nav.contact": "Contact",
+    "profile.location": "Europe / Remote", "profile.status": "Available for selected projects",
+    "case.task": "Task", "case.role": "Role", "case.result": "Result",
     "hero.copy": "I build web products, games and interfaces made to be explored.",
     "hero.button": "Explore<br>projects",
     "about.eyebrow": "02 — ABOUT ME", "about.title": "Code is a<br><em>material.</em>",
@@ -32,10 +19,21 @@ const translations = {
     "about.link": "Explore my GitHub", "projects.title": "Projects",
     "skills.eyebrow": "03 — CAPABILITIES", "skills.title": "My creative<br><em>toolbox.</em>",
     "skills.intro": "A practical stack for taking an idea from first prototype to a polished, deployed product.",
-    "skills.backend": "BACKEND / LOGIC", "skills.backendCopy": "APIs, server-side rendering, automation and application architecture.",
-    "skills.frontend": "FRONTEND / UI", "skills.frontendCopy": "Responsive interfaces, state, browser APIs and thoughtful interactions.",
-    "skills.creative": "CREATIVE / 3D", "skills.creativeCopy": "Real-time scenes, motion systems, particles and immersive web experiences.",
-    "skills.product": "PRODUCT / SHIP", "skills.productCopy": "Version control, deployment, performance and iterative product delivery.",
+    "skills.hint": "Click to explore",
+    "skills.programming": "Programming", "skills.programmingCopy": "I build the logic behind web apps, tools and automated systems.",
+    "skills.programmingBack": "Architecture, APIs, data handling and maintainable production code.",
+    "skills.frontend": "Frontend", "skills.frontendCopy": "I craft responsive browser products with clear UX and expressive motion.",
+    "skills.frontendBack": "Component systems, interactive canvas experiences and cross-browser interfaces.",
+    "skills.game": "Game Development", "skills.gameCopy": "I design playable systems, worlds and interfaces for Roblox experiences.",
+    "skills.gameBack": "Gameplay loops, progression, monetization and polished player-facing UI.",
+    "skills.ai": "AI & Automation", "skills.aiCopy": "I integrate AI into useful products, assistants and repeatable workflows.",
+    "skills.aiBack": "From prompt design to AI features connected with real application logic.",
+    "skills.education": "Education Technology", "skills.educationCopy": "I turn complex technology into lessons, tools and educational games.",
+    "skills.educationBack": "Curricula and interactive learning experiences designed for real students.",
+    "skills.tools": "Tools & Delivery", "skills.toolsCopy": "I take work from idea and design through review, release and optimization.",
+    "skills.toolsBack": "Reliable workflows, documentation, QA and performance-minded delivery.",
+    "skills.leadership": "Leadership & Communication", "skills.leadershipCopy": "I help teams understand the problem, raise quality and deliver together.",
+    "skills.leadershipBack": "Clear communication, practical mentoring and ownership from concept to outcome.",
     "projects.count": "selected works<br>from GitHub", "projects.all": "All",
     "contact.title": "Got an idea?<br><span>Let's bring it to life.</span>",
     "contact.copy": "Open to meaningful projects, collaboration and new experiments.",
@@ -43,6 +41,8 @@ const translations = {
   },
   ru: {
     "nav.projects": "Проекты", "nav.skills": "Навыки", "nav.about": "Обо мне", "nav.contact": "Контакты",
+    "profile.location": "Европа / Удалённо", "profile.status": "Открыт для избранных проектов",
+    "case.task": "Задача", "case.role": "Роль", "case.result": "Результат",
     "hero.copy": "Создаю веб-продукты, игры и интерфейсы, которые хочется исследовать.",
     "hero.button": "Смотреть<br>проекты",
     "about.eyebrow": "02 — ОБО МНЕ", "about.title": "Код — это<br><em>материал.</em>",
@@ -51,10 +51,21 @@ const translations = {
     "about.link": "Исследовать мой GitHub", "projects.title": "Проекты",
     "skills.eyebrow": "03 — ВОЗМОЖНОСТИ", "skills.title": "Мой творческий<br><em>инструментарий.</em>",
     "skills.intro": "Практический стек, чтобы провести идею от первого прототипа до отполированного продукта в интернете.",
-    "skills.backend": "BACKEND / ЛОГИКА", "skills.backendCopy": "API, серверный рендеринг, автоматизация и архитектура приложений.",
-    "skills.frontend": "FRONTEND / UI", "skills.frontendCopy": "Адаптивные интерфейсы, состояние, браузерные API и продуманные взаимодействия.",
-    "skills.creative": "КРЕАТИВ / 3D", "skills.creativeCopy": "Сцены реального времени, системы движения, частицы и иммерсивный веб.",
-    "skills.product": "ПРОДУКТ / РЕЛИЗ", "skills.productCopy": "Контроль версий, деплой, производительность и итеративная разработка.",
+    "skills.hint": "Нажми — там больше",
+    "skills.programming": "Программирование", "skills.programmingCopy": "Создаю логику веб-приложений, инструментов и автоматизированных систем.",
+    "skills.programmingBack": "Архитектура, API, работа с данными и поддерживаемый production-код.",
+    "skills.frontend": "Frontend", "skills.frontendCopy": "Создаю адаптивные браузерные продукты с ясным UX и выразительной анимацией.",
+    "skills.frontendBack": "Компонентные системы, интерактивный Canvas и кроссбраузерные интерфейсы.",
+    "skills.game": "Разработка игр", "skills.gameCopy": "Проектирую игровые системы, миры и интерфейсы для Roblox.",
+    "skills.gameBack": "Игровые циклы, прогрессия, монетизация и отполированный UI для игроков.",
+    "skills.ai": "AI и автоматизация", "skills.aiCopy": "Встраиваю AI в полезные продукты, ассистентов и рабочие процессы.",
+    "skills.aiBack": "От проектирования промптов до AI-функций, связанных с реальной логикой приложения.",
+    "skills.education": "Образовательные технологии", "skills.educationCopy": "Превращаю сложные технологии в уроки, инструменты и образовательные игры.",
+    "skills.educationBack": "Программы и интерактивное обучение, созданные для реальных учеников.",
+    "skills.tools": "Инструменты и релиз", "skills.toolsCopy": "Провожу работу от идеи и дизайна до ревью, релиза и оптимизации.",
+    "skills.toolsBack": "Надёжные процессы, документация, QA и оптимизация производительности.",
+    "skills.leadership": "Лидерство и коммуникация", "skills.leadershipCopy": "Помогаю командам понять задачу, повысить качество и вместе довести продукт до результата.",
+    "skills.leadershipBack": "Ясная коммуникация, практическое наставничество и ответственность за результат.",
     "projects.count": "избранных работ<br>из GitHub", "projects.all": "Все",
     "contact.title": "Есть идея?<br><span>Давайте оживим.</span>",
     "contact.copy": "Открыт для интересных проектов, командной работы и новых экспериментов.",
@@ -62,6 +73,8 @@ const translations = {
   },
   pl: {
     "nav.projects": "Projekty", "nav.skills": "Umiejętności", "nav.about": "O mnie", "nav.contact": "Kontakt",
+    "profile.location": "Europa / Zdalnie", "profile.status": "Dostępny dla wybranych projektów",
+    "case.task": "Zadanie", "case.role": "Rola", "case.result": "Rezultat",
     "hero.copy": "Tworzę produkty internetowe, gry i interfejsy, które chce się odkrywać.",
     "hero.button": "Zobacz<br>projekty",
     "about.eyebrow": "02 — O MNIE", "about.title": "Kod jest<br><em>materiałem.</em>",
@@ -70,10 +83,21 @@ const translations = {
     "about.link": "Zobacz mój GitHub", "projects.title": "Projekty",
     "skills.eyebrow": "03 — MOŻLIWOŚCI", "skills.title": "Mój kreatywny<br><em>warsztat.</em>",
     "skills.intro": "Praktyczny zestaw narzędzi, który prowadzi pomysł od prototypu do dopracowanego produktu online.",
-    "skills.backend": "BACKEND / LOGIKA", "skills.backendCopy": "API, rendering po stronie serwera, automatyzacja i architektura aplikacji.",
-    "skills.frontend": "FRONTEND / UI", "skills.frontendCopy": "Responsywne interfejsy, stan, API przeglądarki i przemyślane interakcje.",
-    "skills.creative": "KREATYWNE / 3D", "skills.creativeCopy": "Sceny czasu rzeczywistego, systemy ruchu, cząsteczki i immersyjny web.",
-    "skills.product": "PRODUKT / PUBLIKACJA", "skills.productCopy": "Kontrola wersji, wdrażanie, wydajność i iteracyjne dostarczanie produktu.",
+    "skills.hint": "Kliknij i odkryj",
+    "skills.programming": "Programowanie", "skills.programmingCopy": "Buduję logikę aplikacji internetowych, narzędzi i systemów automatyzacji.",
+    "skills.programmingBack": "Architektura, API, przetwarzanie danych i łatwy w utrzymaniu kod produkcyjny.",
+    "skills.frontend": "Frontend", "skills.frontendCopy": "Tworzę responsywne produkty przeglądarkowe z czytelnym UX i wyrazistym ruchem.",
+    "skills.frontendBack": "Systemy komponentów, interaktywny Canvas i interfejsy cross-browser.",
+    "skills.game": "Tworzenie gier", "skills.gameCopy": "Projektuję grywalne systemy, światy i interfejsy dla Roblox.",
+    "skills.gameBack": "Pętle rozgrywki, progresja, monetyzacja i dopracowany interfejs gracza.",
+    "skills.ai": "AI i automatyzacja", "skills.aiCopy": "Integruję AI z użytecznymi produktami, asystentami i procesami pracy.",
+    "skills.aiBack": "Od projektowania promptów po funkcje AI połączone z logiką aplikacji.",
+    "skills.education": "Technologie edukacyjne", "skills.educationCopy": "Zmieniam złożoną technologię w lekcje, narzędzia i gry edukacyjne.",
+    "skills.educationBack": "Programy i interaktywne doświadczenia edukacyjne dla prawdziwych uczniów.",
+    "skills.tools": "Narzędzia i publikacja", "skills.toolsCopy": "Prowadzę pracę od pomysłu i projektu przez review po publikację i optymalizację.",
+    "skills.toolsBack": "Niezawodne procesy, dokumentacja, QA i dostarczanie z myślą o wydajności.",
+    "skills.leadership": "Przywództwo i komunikacja", "skills.leadershipCopy": "Pomagam zespołom zrozumieć problem, podnieść jakość i wspólnie dostarczyć produkt.",
+    "skills.leadershipBack": "Jasna komunikacja, praktyczny mentoring i odpowiedzialność za rezultat.",
     "projects.count": "wybranych prac<br>z GitHuba", "projects.all": "Wszystkie",
     "contact.title": "Masz pomysł?<br><span>Ożywmy go razem.</span>",
     "contact.copy": "Jestem otwarty na ciekawe projekty, współpracę i nowe eksperymenty.",
@@ -98,8 +122,36 @@ function observeReveals(root = document) {
 
 observeReveals();
 
+document.querySelectorAll(".skill-card").forEach((card) => {
+  const setFlipped = (flipped) => {
+    card.classList.toggle("is-flipped", flipped);
+    card.setAttribute("aria-expanded", String(flipped));
+  };
+
+  card.addEventListener("click", () => setFlipped(!card.classList.contains("is-flipped")));
+  card.addEventListener("keydown", (event) => {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    setFlipped(!card.classList.contains("is-flipped"));
+  });
+  card.addEventListener("pointerleave", (event) => {
+    if (event.pointerType !== "touch") setFlipped(false);
+  });
+});
+
+document.addEventListener("click", (event) => {
+  if (event.target.closest(".skill-card")) return;
+  document.querySelectorAll(".skill-card.is-flipped").forEach((card) => {
+    card.classList.remove("is-flipped");
+    card.setAttribute("aria-expanded", "false");
+  });
+});
+
 window.addEventListener("scroll", () => {
   document.querySelector(".site-header").classList.toggle("scrolled", window.scrollY > 40);
+  const scrollable = document.documentElement.scrollHeight - innerHeight;
+  const progress = scrollable > 0 ? window.scrollY / scrollable : 0;
+  document.querySelector(".scroll-progress span").style.transform = `scaleX(${progress})`;
 }, { passive: true });
 
 async function loadProjects() {
@@ -125,13 +177,17 @@ function renderFilters() {
 function setLanguage(language) {
   if (!translations[language]) return;
   document.documentElement.lang = language;
+  state.language = language;
   document.querySelectorAll("[data-i18n]").forEach((element) => {
     const value = translations[language][element.dataset.i18n];
     if (value) element.innerHTML = value;
   });
   languageSwitcher.querySelector(".active")?.classList.remove("active");
   languageSwitcher.querySelector(`[data-lang="${language}"]`)?.classList.add("active");
-  if (state.projects.length) renderFilters();
+  if (state.projects.length) {
+    renderFilters();
+    renderProjects();
+  }
   localStorage.setItem("portfolio-language", language);
 }
 
@@ -156,7 +212,15 @@ function renderProjects() {
     card.querySelector(".card-language").textContent = project.language;
     card.querySelector(".visual-letter").textContent = project.name[0];
     card.querySelector("h3").textContent = project.name.replaceAll("-", " ");
-    card.querySelector(".card-body p").textContent = project.description;
+    const projectCase = project.case?.[state.language] || project.case?.en;
+    card.querySelector(".project-cover").src = project.cover;
+    card.querySelector(".project-cover").alt = `${project.name} interface preview`;
+    card.querySelector(".case-task").textContent = projectCase.task;
+    card.querySelector(".case-role").textContent = projectCase.role;
+    card.querySelector(".case-result").textContent = projectCase.result;
+    card.querySelector('[data-i18n="case.task"]').textContent = translations[state.language]["case.task"];
+    card.querySelector('[data-i18n="case.role"]').textContent = translations[state.language]["case.role"];
+    card.querySelector('[data-i18n="case.result"]').textContent = translations[state.language]["case.result"];
     card.querySelector(".card-stats").textContent = `★ ${project.stargazers_count}  ·  ⑂ ${project.forks_count}`;
 
     const topicContainer = card.querySelector(".card-topics");
@@ -172,13 +236,8 @@ function renderProjects() {
     const demoLink = card.querySelector(".demo-link");
     if (project.homepage) {
       demoLink.href = project.homepage;
-      const preview = card.querySelector(".live-preview");
-      preview.dataset.src = project.homepage;
-      preview.dataset.name = project.name;
-      previewObserver.observe(preview);
     } else {
       demoLink.remove();
-      card.querySelector(".live-preview").remove();
       card.querySelector(".preview-badge").remove();
     }
 
@@ -220,6 +279,10 @@ function escapeHtml(value) {
 
 function initSpace() {
   const canvas = document.querySelector("#space");
+  const deviceMemory = navigator.deviceMemory || 4;
+  const cpuCores = navigator.hardwareConcurrency || 4;
+  const lowPower = innerWidth < 700 || deviceMemory <= 4 || cpuCores <= 4;
+  const pixelRatioCap = lowPower ? 1.1 : 1.6;
   const scene = new THREE.Scene();
   scene.fog = new THREE.FogExp2(0x080b0a, 0.035);
 
@@ -227,10 +290,10 @@ function initSpace() {
   camera.position.z = 8;
 
   const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: false, powerPreference: "high-performance" });
-  renderer.setPixelRatio(Math.min(devicePixelRatio, 1.6));
+  renderer.setPixelRatio(Math.min(devicePixelRatio, pixelRatioCap));
   renderer.setSize(innerWidth, innerHeight);
 
-  const particleCount = innerWidth < 700 ? 650 : 1400;
+  const particleCount = lowPower ? 520 : 1400;
   const positions = new Float32Array(particleCount * 3);
   const colors = new Float32Array(particleCount * 3);
   const acid = new THREE.Color(0xc7ff38);
@@ -255,7 +318,7 @@ function initSpace() {
   scene.add(particles);
 
   const dustGeometry = new THREE.BufferGeometry();
-  const dustCount = innerWidth < 700 ? 130 : 300;
+  const dustCount = lowPower ? 90 : 300;
   const dustPositions = new Float32Array(dustCount * 3);
   for (let index = 0; index < dustCount * 3; index += 3) {
     dustPositions[index] = (Math.random() - 0.5) * 18;
@@ -320,11 +383,13 @@ function initSpace() {
     camera.aspect = innerWidth / innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(innerWidth, innerHeight);
-    renderer.setPixelRatio(Math.min(devicePixelRatio, 1.6));
+    renderer.setPixelRatio(Math.min(devicePixelRatio, pixelRatioCap));
   });
 
   const clock = new THREE.Clock();
+  let animationFrame;
   function animate() {
+    if (document.hidden) return;
     const time = clock.getElapsedTime();
     const scrollProgress = window.scrollY / Math.max(document.body.scrollHeight - innerHeight, 1);
     particles.rotation.y = time * 0.018 + scrollProgress * 0.8;
@@ -344,9 +409,16 @@ function initSpace() {
       node.position.y = node.userData.baseY + Math.sin(time * node.userData.speed + index) * 0.22;
     });
     renderer.render(scene, camera);
-    requestAnimationFrame(animate);
+    animationFrame = requestAnimationFrame(animate);
   }
   animate();
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) {
+      cancelAnimationFrame(animationFrame);
+    } else {
+      animate();
+    }
+  });
 }
 
 setLanguage(localStorage.getItem("portfolio-language") || "en");
