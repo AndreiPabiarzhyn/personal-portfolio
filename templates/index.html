@@ -16,7 +16,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Unbounded:wght@500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=6">
   <script type="importmap">
     {
       "imports": {
@@ -32,8 +32,12 @@
       "url": "{{ request.url_root }}",
       "image": "{{ url_for('static', filename='images/avatar-game.jpg', _external=True) }}",
       "jobTitle": "Software Developer & Programming Educator",
+      "email": "mailto:pabiarzhyn.andrei@gmail.com",
       "worksFor": {"@type": "Organization", "name": "Kodland"},
-      "sameAs": ["https://github.com/{{ github_user }}"],
+      "sameAs": [
+        "https://github.com/{{ github_user }}",
+        "https://www.linkedin.com/in/andrei-pabiarzhyn-668030273/"
+      ],
       "knowsAbout": ["Python", "JavaScript", "TypeScript", "React", "Roblox Studio", "Artificial Intelligence", "Educational Technology"]
     }
   </script>
@@ -282,13 +286,25 @@
         <h2 class="contact-title reveal" data-i18n="contact.title">Got an idea?<br><span>Let's bring it to life.</span></h2>
         <div class="contact-side reveal">
           <p data-i18n="contact.copy">Open to meaningful projects, collaboration and new experiments.</p>
-          <a class="contact-button magnetic" href="https://github.com/{{ github_user }}" target="_blank" rel="noreferrer"><span data-i18n="contact.button">Contact via GitHub</span> <span>↗</span></a>
+          <div class="contact-links">
+            <a class="contact-email" href="mailto:pabiarzhyn.andrei@gmail.com">
+              <small>Email me</small>
+              <span>pabiarzhyn.andrei@gmail.com</span>
+            </a>
+            <a class="contact-button magnetic" href="https://www.linkedin.com/in/andrei-pabiarzhyn-668030273/" target="_blank" rel="noreferrer">
+              <span>LinkedIn</span><b>↗</b>
+            </a>
+            <a class="contact-button magnetic" href="https://github.com/{{ github_user }}" target="_blank" rel="noreferrer">
+              <span>GitHub</span><b>↗</b>
+            </a>
+          </div>
         </div>
       </div>
       <footer>
         <span>© <span id="year"></span> ANDREI PABIARZHYN</span>
         <span>BUILT WITH FLASK + THREE.JS</span>
-        <a href="#top">BACK TO TOP ↑</a>
+        <a href="mailto:pabiarzhyn.andrei@gmail.com">PABIARZHYN.ANDREI@GMAIL.COM</a>
+        <a class="back-to-top" href="#top">BACK TO TOP <b>↑</b></a>
       </footer>
     </section>
   </main>
@@ -389,6 +405,6 @@
     </article>
   </template>
 
-  <script type="module" src="{{ url_for('static', filename='js/app.js') }}"></script>
+  <script type="module" src="{{ url_for('static', filename='js/app.js') }}?v=6"></script>
 </body>
 </html>

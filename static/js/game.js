@@ -28,7 +28,7 @@ const COPY = {
         wisdom: "Python helps beginners focus on logic and problem solving instead of language complexity.",
       },
     ],
-    finish: "Focus {focus}% · Words {pattern}/6 · Python {python}/3",
+    finish: "Focus {focus}% · Words {pattern}/6 · Python {python}/5",
   },
   ru: {
     introTitle: "Три испытания.<br>Три полезных открытия.",
@@ -59,7 +59,7 @@ const COPY = {
         wisdom: "Python помогает новичку сосредоточиться на логике и решении задач, а не на сложности языка.",
       },
     ],
-    finish: "Внимание {focus}% · Слова {pattern}/6 · Python {python}/3",
+    finish: "Внимание {focus}% · Слова {pattern}/6 · Python {python}/5",
   },
   pl: {
     introTitle: "Trzy wyzwania.<br>Trzy przydatne odkrycia.",
@@ -90,14 +90,16 @@ const COPY = {
         wisdom: "Python pozwala początkującym skupić się na logice i rozwiązywaniu problemów zamiast na złożoności języka.",
       },
     ],
-    finish: "Skupienie {focus}% · Słowa {pattern}/6 · Python {python}/3",
+    finish: "Skupienie {focus}% · Słowa {pattern}/6 · Python {python}/5",
   },
 };
 
 const PYTHON_QUESTIONS = [
-  { code: 'len("AI")', options: ["1", "2", "3"], answer: "2" },
-  { code: "3 + 2 * 2", options: ["10", "7", "8"], answer: "7" },
-  { code: "2 ** 3", options: ["6", "8", "9"], answer: "8" },
+  { label: "OUTPUT", code: 'len("AI")', options: ["1", "2", "3"], answer: "2", explain: "The string contains two characters." },
+  { label: "OUTPUT", code: "score = 3\nscore += 2", options: ["3", "5", "6"], answer: "5", explain: "+= adds and stores the new value." },
+  { label: "INDEX", code: 'items = ["AI", "Python"]\nitems[0]', options: ["AI", "Python", "0"], answer: "AI", explain: "Python lists start at index zero." },
+  { label: "RANGE", code: "list(range(3))", options: ["[1,2,3]", "[0,1,2]", "[0,1,2,3]"], answer: "[0,1,2]", explain: "range stops before the upper bound." },
+  { label: "FIX THE CODE", code: 'if score > 5\n    print("Win")', options: ["Add :", "Add ;", "Add ()"], answer: "Add :", explain: "Python blocks begin with a colon." },
 ];
 
 const CODE_WORDS = ["CODE", "LOOP", "GAME", "LOGIC", "PIXEL", "PYTHON"];
@@ -133,6 +135,11 @@ export function initMindRunner() {
     wordY: 80,
     wordX: 480,
     wordCompleteAt: 0,
+    questionStartedAt: 0,
+    pythonLocked: false,
+    pythonNextAt: 0,
+    pythonMessage: "",
+    pythonMessageColor: "#c7ff38",
     blasts: [],
     sparks: [],
     feedback: "",
@@ -201,6 +208,10 @@ export function initMindRunner() {
     state.wordY = 80;
     state.wordX = 480;
     state.wordCompleteAt = 0;
+    state.questionStartedAt = 0;
+    state.pythonLocked = false;
+    state.pythonNextAt = 0;
+    state.pythonMessage = "";
     state.blasts = [];
     state.sparks = [];
     state.feedback = "";
@@ -211,12 +222,9 @@ export function initMindRunner() {
     updateStage();
     showScreen("play");
 
-    if (level === 2) {
-      showPythonQuestion();
-    } else {
-      if (level === 1 && window.matchMedia("(pointer: coarse)").matches) showShooterKeys();
-      state.frame = requestAnimationFrame(gameLoop);
-    }
+    if (level === 2) showPythonQuestion();
+    if (level === 1 && window.matchMedia("(pointer: coarse)").matches) showShooterKeys();
+    state.frame = requestAnimationFrame(gameLoop);
   }
 
   function updateProgress() {
@@ -238,12 +246,12 @@ export function initMindRunner() {
   }
 
   function updateScore() {
-    const target = state.level === 2 ? 3 : state.level === 1 ? 6 : 8;
+    const target = state.level === 2 ? 5 : state.level === 1 ? 6 : 8;
     modal.querySelector(".game-score").textContent = `${state.score} / ${target}`;
   }
 
   function gameLoop(time) {
-    if (!state.running || !state.open || state.level === 2) return;
+    if (!state.running || !state.open) return;
     const delta = Math.min((time - state.lastTime) / 16.67, 2);
     state.lastTime = time;
     context.clearRect(0, 0, canvas.width, canvas.height);
@@ -256,6 +264,7 @@ export function initMindRunner() {
 
     if (state.level === 0) updateFocusLevel(time, delta);
     if (state.level === 1) updateCodeBlaster(time, delta);
+    if (state.level === 2) updatePythonGates(time);
     context.restore();
     drawFeedback(time);
 
@@ -564,16 +573,10 @@ export function initMindRunner() {
 
   function showPythonQuestion() {
     const question = PYTHON_QUESTIONS[state.question];
-    drawWorld(performance.now());
-    context.fillStyle = "#929b90";
-    context.font = "700 13px Manrope";
-    context.textAlign = "center";
-    context.fillText("CHOOSE THE OUTPUT", canvas.width / 2, 120);
-    context.fillStyle = "#eef4e8";
-    context.font = "600 52px monospace";
-    context.fillText(question.code, canvas.width / 2, 225);
-    context.strokeStyle = "rgba(199,255,56,.25)";
-    context.strokeRect(canvas.width / 2 - 230, 160, 460, 100);
+    state.questionStartedAt = performance.now();
+    state.pythonLocked = false;
+    state.pythonNextAt = 0;
+    state.pythonMessage = "";
 
     answerBox.innerHTML = "";
     answerBox.classList.remove("shooter-keys");
@@ -587,22 +590,153 @@ export function initMindRunner() {
     answerBox.hidden = false;
   }
 
+  function updatePythonGates(time) {
+    const question = PYTHON_QUESTIONS[state.question];
+    if (!question) return;
+    const elapsed = time - state.questionStartedAt;
+    const remaining = Math.max(0, 1 - elapsed / 33000);
+
+    drawPythonCorridor(time, remaining);
+    drawCodePanel(question);
+    drawGates(question.options, time);
+    updateSparks(1);
+
+    if (state.pythonMessage) {
+      context.save();
+      context.textAlign = "center";
+      context.fillStyle = state.pythonMessageColor;
+      context.font = "700 19px Manrope";
+      context.fillText(state.pythonMessage, canvas.width / 2, canvas.height - 112);
+      context.restore();
+    }
+
+    if (!state.pythonLocked && remaining <= 0) answerPython(null);
+    if (state.pythonLocked && time >= state.pythonNextAt) {
+      state.question += 1;
+      if (state.question >= PYTHON_QUESTIONS.length) {
+        state.results.python = state.score;
+        answerBox.hidden = true;
+        completeLevel();
+      } else {
+        showPythonQuestion();
+      }
+    }
+  }
+
+  function drawPythonCorridor(time, remaining) {
+    const cx = canvas.width / 2;
+    const horizon = 245;
+    context.save();
+    context.strokeStyle = "rgba(156,123,255,.18)";
+    context.lineWidth = 1;
+    for (let index = -7; index <= 7; index += 1) {
+      context.beginPath();
+      context.moveTo(cx + index * 24, horizon);
+      context.lineTo(cx + index * 92, canvas.height);
+      context.stroke();
+    }
+    const travel = (time * 0.08) % 72;
+    for (let y = horizon + travel; y < canvas.height; y += 72) {
+      const depth = (y - horizon) / (canvas.height - horizon);
+      context.strokeStyle = `rgba(199,255,56,${0.04 + depth * 0.16})`;
+      context.beginPath();
+      context.moveTo(cx - depth * 650, y);
+      context.lineTo(cx + depth * 650, y);
+      context.stroke();
+    }
+    context.fillStyle = "rgba(238,244,232,.08)";
+    context.fillRect(76, 24, canvas.width - 152, 5);
+    context.fillStyle = remaining > .3 ? "#c7ff38" : "#ff6688";
+    context.fillRect(76, 24, (canvas.width - 152) * remaining, 5);
+    context.fillStyle = remaining > .3 ? "#c7ff38" : "#ff6688";
+    context.font = "700 12px Manrope";
+    context.textAlign = "right";
+    context.fillText(`TIME ${Math.ceil(remaining * 33)}s`, canvas.width - 76, 48);
+    context.restore();
+  }
+
+  function drawCodePanel(question) {
+    context.save();
+    context.fillStyle = "rgba(8,12,9,.88)";
+    context.strokeStyle = "rgba(199,255,56,.25)";
+    context.lineWidth = 1;
+    roundRect(context, canvas.width / 2 - 285, 48, 570, 154, 18);
+    context.fill();
+    context.stroke();
+    context.fillStyle = "#c7ff38";
+    context.font = "700 11px Manrope";
+    context.textAlign = "center";
+    context.fillText(`${question.label} · ${state.question + 1}/${PYTHON_QUESTIONS.length}`, canvas.width / 2, 76);
+    context.fillStyle = "#eef4e8";
+    context.font = question.code.length > 30 ? "600 24px monospace" : "600 31px monospace";
+    question.code.split("\n").forEach((line, index) => {
+      context.fillText(line, canvas.width / 2, 123 + index * 34);
+    });
+    context.restore();
+  }
+
+  function drawGates(options, time) {
+    const centers = [245, 480, 715];
+    options.forEach((option, index) => {
+      const pulse = 1 + Math.sin(time * 0.004 + index) * 0.025;
+      const x = centers[index];
+      const y = 300;
+      const width = 162 * pulse;
+      const height = 105 * pulse;
+      context.save();
+      context.translate(x, y);
+      context.strokeStyle = index === 1 ? "rgba(199,255,56,.65)" : "rgba(156,123,255,.58)";
+      context.fillStyle = index === 1 ? "rgba(199,255,56,.06)" : "rgba(156,123,255,.07)";
+      context.lineWidth = 3;
+      context.shadowColor = index === 1 ? "#c7ff38" : "#9c7bff";
+      context.shadowBlur = 18;
+      context.beginPath();
+      context.moveTo(-width * .42, -height / 2);
+      context.lineTo(width * .42, -height / 2);
+      context.lineTo(width / 2, height / 2);
+      context.lineTo(-width / 2, height / 2);
+      context.closePath();
+      context.fill();
+      context.stroke();
+      context.shadowBlur = 0;
+      context.fillStyle = "#929b90";
+      context.font = "700 11px Manrope";
+      context.textAlign = "center";
+      context.fillText(String(index + 1), 0, -22);
+      context.fillStyle = "#eef4e8";
+      context.font = "600 17px monospace";
+      context.fillText(option, 0, 14);
+      context.restore();
+    });
+  }
+
+  function roundRect(ctx, x, y, width, height, radius) {
+    ctx.beginPath();
+    ctx.roundRect(x, y, width, height, radius);
+  }
+
   function answerPython(answer) {
+    if (state.pythonLocked) return;
     const question = PYTHON_QUESTIONS[state.question];
     if (answer === question.answer) {
       state.score += 1;
+      state.pythonMessage = `✓ ${question.explain}`;
+      state.pythonMessageColor = "#c7ff38";
+      createExplosion(canvas.width / 2, canvas.height - 145);
     } else {
       state.mistakes += 1;
+      state.pythonMessage = `× ${question.answer} · ${question.explain}`;
+      state.pythonMessageColor = "#ff6688";
+      state.shake = 14;
     }
     updateScore();
-    state.question += 1;
-    if (state.question >= PYTHON_QUESTIONS.length) {
-      state.results.python = state.score;
-      answerBox.hidden = true;
-      completeLevel();
-    } else {
-      showPythonQuestion();
-    }
+    state.pythonLocked = true;
+    state.pythonNextAt = performance.now() + 1650;
+    [...answerBox.children].forEach((button) => {
+      button.disabled = true;
+      if (button.textContent === question.answer) button.classList.add("correct");
+      if (answer !== question.answer && button.textContent === answer) button.classList.add("wrong");
+    });
   }
 
   function completeLevel() {
@@ -614,7 +748,7 @@ export function initMindRunner() {
     const rewards = [
       `${stage.title} · ${state.results.focus}%`,
       `${stage.title} · ${state.results.pattern}/6`,
-      `${stage.title} · ${state.results.python}/3`,
+      `${stage.title} · ${state.results.python}/5`,
     ];
     modal.querySelector(".wisdom-reward").textContent = rewards[state.level];
     const next = modal.querySelector("[data-game-next]");
@@ -656,6 +790,12 @@ export function initMindRunner() {
   canvas.addEventListener("pointermove", mapPointer);
   canvas.addEventListener("pointerdown", (event) => {
     mapPointer(event);
+    if (state.running && state.level === 2 && !state.pythonLocked) {
+      const rect = canvas.getBoundingClientRect();
+      const x = ((event.clientX - rect.left) / rect.width) * canvas.width;
+      const gate = x < 360 ? 0 : x < 600 ? 1 : 2;
+      answerPython(PYTHON_QUESTIONS[state.question].options[gate]);
+    }
   });
   window.addEventListener("keydown", (event) => {
     if (!state.open) return;
@@ -663,6 +803,10 @@ export function initMindRunner() {
     if (state.level === 1 && /^[a-z]$/i.test(event.key)) {
       event.preventDefault();
       handleTyping(event.key);
+    } else if (state.level === 2 && ["1", "2", "3"].includes(event.key)) {
+      event.preventDefault();
+      const option = PYTHON_QUESTIONS[state.question]?.options[Number(event.key) - 1];
+      if (option) answerPython(option);
     } else if (event.code === "Space") {
       event.preventDefault();
     }

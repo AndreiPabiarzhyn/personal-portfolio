@@ -7,6 +7,14 @@ from .github import get_featured_projects
 main = Blueprint("main", __name__)
 
 
+@main.after_app_request
+def prevent_stale_html(response):
+    if response.mimetype == "text/html":
+        response.headers["Cache-Control"] = "no-store, max-age=0"
+        response.headers["Pragma"] = "no-cache"
+    return response
+
+
 @main.get("/")
 def index():
     return render_template("index.html", github_user=GITHUB_USER)

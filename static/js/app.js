@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { initMindRunner } from "./game.js";
+import { initMindRunner } from "./game.js?v=6";
 
 const state = { projects: [], filter: "all", language: "en" };
 const grid = document.querySelector("#project-grid");
@@ -125,6 +125,20 @@ function observeReveals(root = document) {
 }
 
 observeReveals();
+
+const sectionNavObserver = new IntersectionObserver((entries) => {
+  const visible = entries
+    .filter((entry) => entry.isIntersecting)
+    .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+  if (!visible) return;
+  document.querySelectorAll(".desktop-nav a").forEach((link) => {
+    const active = link.getAttribute("href") === `#${visible.target.id}`;
+    if (active) link.setAttribute("aria-current", "true");
+    else link.removeAttribute("aria-current");
+  });
+}, { rootMargin: "-28% 0px -55% 0px", threshold: [0, .2, .5] });
+
+document.querySelectorAll("main section[id]").forEach((section) => sectionNavObserver.observe(section));
 
 document.querySelectorAll(".skill-card").forEach((card) => {
   const setFlipped = (flipped) => {
