@@ -1036,6 +1036,16 @@ body.game-open #space { opacity: .28; transform: scale(1.06); filter: blur(3px);
   font: 600 18px "Unbounded", sans-serif;
 }
 .game-answers button:hover { color: #080b0a; border-color: var(--acid); background: var(--acid); }
+.game-answers.shooter-keys {
+  grid-template-columns: repeat(5, minmax(44px, 72px));
+  justify-content: center;
+}
+.game-answers.shooter-keys button {
+  color: #080b0a;
+  border-color: var(--acid);
+  background: var(--acid);
+  box-shadow: 0 0 18px rgba(199, 255, 56, .13);
+}
 .game-wisdom, .game-finish {
   position: relative;
   height: calc(100% - 96px);
@@ -1154,6 +1164,7 @@ body.game-open #space { opacity: .28; transform: scale(1.06); filter: blur(3px);
   .game-controls { display: none; }
   .game-answers { inset: auto 20px 36px; gap: 7px; }
   .game-answers button { padding: 14px 6px; font-size: 14px; }
+  .game-answers.shooter-keys { grid-template-columns: repeat(5, minmax(42px, 58px)); }
   .game-wisdom, .game-finish { height: calc(100% - 130px); padding: 30px 20px; }
   .game-wisdom h3, .game-finish h3 { font-size: 29px; line-height: 1.2; }
   .wisdom-text { font-size: 17px; line-height: 1.7; }

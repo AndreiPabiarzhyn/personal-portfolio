@@ -7,6 +7,7 @@ const COPY = {
     next: "Next level",
     result: "See result",
     controls: "MOUSE / TOUCH · SPACE TO JUMP · ESC TO CLOSE",
+    levelControls: ["MOVE THE POINTER · ESC TO CLOSE", "TYPE LETTERS TO FIRE · ESC TO CLOSE", "CHOOSE A GATE · ESC TO CLOSE"],
     levels: [
       {
         title: "Focus Field",
@@ -15,10 +16,10 @@ const COPY = {
         wisdom: "Children maintain attention longer when every action produces fast, clear and meaningful feedback.",
       },
       {
-        title: "Pattern Run",
-        instruction: "Click or press Space to jump. Read the repeating obstacle pattern.",
-        wisdomTitle: "Patterns become algorithms.",
-        wisdom: "Recognizing and testing patterns is one of the first steps toward algorithmic thinking.",
+        title: "Code Blaster",
+        instruction: "Type the falling word in order. Every correct letter fires the ship's laser.",
+        wisdomTitle: "Fluency frees working memory.",
+        wisdom: "When basic commands become familiar, learners can spend more attention on patterns, logic and creative problem solving.",
       },
       {
         title: "Python Gates",
@@ -27,7 +28,7 @@ const COPY = {
         wisdom: "Python helps beginners focus on logic and problem solving instead of language complexity.",
       },
     ],
-    finish: "Focus {focus}% · Pattern {pattern}/8 · Python {python}/3",
+    finish: "Focus {focus}% · Words {pattern}/6 · Python {python}/3",
   },
   ru: {
     introTitle: "Три испытания.<br>Три полезных открытия.",
@@ -37,6 +38,7 @@ const COPY = {
     next: "Следующий уровень",
     result: "Увидеть результат",
     controls: "МЫШЬ / КАСАНИЕ · ПРОБЕЛ ДЛЯ ПРЫЖКА · ESC — ВЫХОД",
+    levelControls: ["ДВИГАЙ УКАЗАТЕЛЬ · ESC — ВЫХОД", "ПЕЧАТАЙ БУКВЫ ДЛЯ СТРЕЛЬБЫ · ESC — ВЫХОД", "ВЫБЕРИ ВОРОТА · ESC — ВЫХОД"],
     levels: [
       {
         title: "Поле внимания",
@@ -45,10 +47,10 @@ const COPY = {
         wisdom: "Дети дольше сохраняют концентрацию, когда каждое действие получает быструю, понятную и значимую реакцию.",
       },
       {
-        title: "Забег паттернов",
-        instruction: "Кликай или нажимай пробел для прыжка. Заметь повторяющийся порядок препятствий.",
-        wisdomTitle: "Паттерны превращаются в алгоритмы.",
-        wisdom: "Поиск и проверка закономерностей — один из первых шагов к алгоритмическому мышлению.",
+        title: "Code Blaster",
+        instruction: "Набирай падающее слово по порядку. Каждая правильная буква запускает лазер корабля.",
+        wisdomTitle: "Беглость освобождает рабочую память.",
+        wisdom: "Когда базовые команды становятся привычными, ученик тратит больше внимания на закономерности, логику и творческие решения.",
       },
       {
         title: "Ворота Python",
@@ -57,7 +59,7 @@ const COPY = {
         wisdom: "Python помогает новичку сосредоточиться на логике и решении задач, а не на сложности языка.",
       },
     ],
-    finish: "Внимание {focus}% · Паттерны {pattern}/8 · Python {python}/3",
+    finish: "Внимание {focus}% · Слова {pattern}/6 · Python {python}/3",
   },
   pl: {
     introTitle: "Trzy wyzwania.<br>Trzy przydatne odkrycia.",
@@ -67,6 +69,7 @@ const COPY = {
     next: "Następny poziom",
     result: "Zobacz wynik",
     controls: "MYSZ / DOTYK · SPACJA — SKOK · ESC — WYJŚCIE",
+    levelControls: ["PORUSZAJ WSKAŹNIKIEM · ESC — WYJŚCIE", "PISZ LITERY, ABY STRZELAĆ · ESC — WYJŚCIE", "WYBIERZ BRAMĘ · ESC — WYJŚCIE"],
     levels: [
       {
         title: "Pole skupienia",
@@ -75,10 +78,10 @@ const COPY = {
         wisdom: "Dzieci dłużej utrzymują uwagę, gdy każde działanie daje szybką, jasną i znaczącą reakcję.",
       },
       {
-        title: "Bieg wzorców",
-        instruction: "Kliknij lub naciśnij spację, aby skoczyć. Odczytaj powtarzający się wzór przeszkód.",
-        wisdomTitle: "Wzorce stają się algorytmami.",
-        wisdom: "Rozpoznawanie i testowanie wzorców to jeden z pierwszych kroków do myślenia algorytmicznego.",
+        title: "Code Blaster",
+        instruction: "Wpisuj spadające słowo po kolei. Każda poprawna litera uruchamia laser statku.",
+        wisdomTitle: "Płynność uwalnia pamięć roboczą.",
+        wisdom: "Gdy podstawowe polecenia stają się znajome, uczeń może poświęcić więcej uwagi wzorcom, logice i twórczym rozwiązaniom.",
       },
       {
         title: "Bramy Pythona",
@@ -87,7 +90,7 @@ const COPY = {
         wisdom: "Python pozwala początkującym skupić się na logice i rozwiązywaniu problemów zamiast na złożoności języka.",
       },
     ],
-    finish: "Skupienie {focus}% · Wzorce {pattern}/8 · Python {python}/3",
+    finish: "Skupienie {focus}% · Słowa {pattern}/6 · Python {python}/3",
   },
 };
 
@@ -96,6 +99,8 @@ const PYTHON_QUESTIONS = [
   { code: "3 + 2 * 2", options: ["10", "7", "8"], answer: "7" },
   { code: "2 ** 3", options: ["6", "8", "9"], answer: "8" },
 ];
+
+const CODE_WORDS = ["CODE", "LOOP", "GAME", "LOGIC", "PIXEL", "PYTHON"];
 
 export function initMindRunner() {
   const modal = document.querySelector("#mind-runner");
@@ -123,6 +128,13 @@ export function initMindRunner() {
     playerY: 350,
     velocityY: 0,
     question: 0,
+    wordIndex: 0,
+    letterIndex: 0,
+    wordY: 80,
+    wordX: 480,
+    wordCompleteAt: 0,
+    blasts: [],
+    sparks: [],
     feedback: "",
     feedbackColor: "#c7ff38",
     feedbackUntil: 0,
@@ -184,6 +196,13 @@ export function initMindRunner() {
     state.playerY = 350;
     state.velocityY = 0;
     state.question = 0;
+    state.wordIndex = 0;
+    state.letterIndex = 0;
+    state.wordY = 80;
+    state.wordX = 480;
+    state.wordCompleteAt = 0;
+    state.blasts = [];
+    state.sparks = [];
     state.feedback = "";
     state.shake = 0;
     answerBox.hidden = true;
@@ -195,6 +214,7 @@ export function initMindRunner() {
     if (level === 2) {
       showPythonQuestion();
     } else {
+      if (level === 1 && window.matchMedia("(pointer: coarse)").matches) showShooterKeys();
       state.frame = requestAnimationFrame(gameLoop);
     }
   }
@@ -213,11 +233,12 @@ export function initMindRunner() {
     modal.querySelector(".game-stage-number").textContent = `${copy.level.toUpperCase()} ${String(state.level + 1).padStart(2, "0")}`;
     modal.querySelector(".game-stage-title").textContent = stage.title;
     modal.querySelector(".game-instruction").textContent = stage.instruction;
+    modal.querySelector(".game-controls").textContent = copy.levelControls[state.level];
     updateScore();
   }
 
   function updateScore() {
-    const target = state.level === 2 ? 3 : 8;
+    const target = state.level === 2 ? 3 : state.level === 1 ? 6 : 8;
     modal.querySelector(".game-score").textContent = `${state.score} / ${target}`;
   }
 
@@ -234,7 +255,7 @@ export function initMindRunner() {
     drawWorld(time);
 
     if (state.level === 0) updateFocusLevel(time, delta);
-    if (state.level === 1) updatePatternLevel(time, delta);
+    if (state.level === 1) updateCodeBlaster(time, delta);
     context.restore();
     drawFeedback(time);
 
@@ -344,66 +365,201 @@ export function initMindRunner() {
     }
   }
 
-  function updatePatternLevel(time, delta) {
-    const ground = 380;
-    state.velocityY += 0.8 * delta;
-    state.playerY += state.velocityY * delta;
-    if (state.playerY > ground) {
-      state.playerY = ground;
-      state.velocityY = 0;
-    }
+  function updateCodeBlaster(time, delta) {
+    drawStarTunnel(time);
+    drawShip(canvas.width / 2, canvas.height - 54, time);
+    updateBlasts(delta);
+    updateSparks(delta);
 
-    context.strokeStyle = "rgba(199,255,56,.32)";
-    context.beginPath();
-    context.moveTo(0, ground + 38);
-    context.lineTo(canvas.width, ground + 38);
-    context.stroke();
-    drawAvatar(130, state.playerY, 34);
-
-    if (time > state.spawnAt) {
-      const pattern = ["low", "high", "high", "low"];
-      const type = pattern[state.attempts % pattern.length];
-      state.entities.push({ x: canvas.width + 50, type, passed: false, hit: false });
-      state.spawnAt = time + 1450;
-      state.attempts += 1;
-    }
-
-    state.entities.forEach((entity) => {
-      entity.x -= 6.5 * delta;
-      const y = entity.type === "low" ? ground - 18 : ground - 132;
-      const height = entity.type === "low" ? 74 : 58;
-      context.fillStyle = entity.type === "low" ? "#9c7bff" : "#c7ff38";
-      context.fillRect(entity.x, y, 26, height);
-
-      const playerTop = state.playerY - 34;
-      const playerBottom = state.playerY + 34;
-      if (!entity.hit && entity.x < 164 && entity.x + 26 > 96 && playerBottom > y && playerTop < y + height) {
-        entity.hit = true;
-        state.mistakes += 1;
-        state.score = Math.max(0, state.score - 1);
-        triggerFeedback("COLLISION · -1", "#9c7bff", true);
-        updateScore();
-      }
-      if (!entity.passed && entity.x < 90) {
-        entity.passed = true;
-        if (!entity.hit) {
-          state.score += 1;
-          triggerFeedback("PATTERN +1", "#c7ff38");
+    if (state.wordCompleteAt) {
+      if (time >= state.wordCompleteAt) {
+        state.wordCompleteAt = 0;
+        state.wordIndex += 1;
+        state.letterIndex = 0;
+        state.wordY = 76;
+        state.wordX = 240 + Math.random() * 480;
+        if (state.wordIndex >= CODE_WORDS.length) {
+          state.results.pattern = state.score;
+          answerBox.hidden = true;
+          completeLevel();
+        } else if (window.matchMedia("(pointer: coarse)").matches) {
+          showShooterKeys();
         }
-        updateScore();
       }
-    });
-    state.entities = state.entities.filter((entity) => entity.x > -60);
-    if (state.score >= 8) {
-      state.results.pattern = Math.max(0, 8 - state.mistakes);
-      completeLevel();
+      return;
+    }
+
+    const word = CODE_WORDS[state.wordIndex];
+    state.wordY += 0.42 * delta;
+    drawFallingWord(word);
+
+    if (state.wordY > canvas.height - 118) {
+      state.mistakes += 1;
+      state.letterIndex = 0;
+      state.wordY = 72;
+      state.wordX = 240 + Math.random() * 480;
+      triggerFeedback("HULL HIT · WORD RESET", "#9c7bff", true);
+      if (window.matchMedia("(pointer: coarse)").matches) showShooterKeys();
     }
   }
 
-  function jump() {
-    if (state.running && state.level === 1 && state.playerY >= 379) {
-      state.velocityY = -15;
+  function drawStarTunnel(time) {
+    const centerX = canvas.width / 2;
+    const centerY = canvas.height * 0.42;
+    context.save();
+    for (let index = 0; index < 54; index += 1) {
+      const phase = ((time * 0.00012 + index / 54) % 1);
+      const angle = index * 2.399;
+      const distance = phase * 520;
+      const x = centerX + Math.cos(angle) * distance * 1.45;
+      const y = centerY + Math.sin(angle) * distance * 0.7;
+      const size = 0.6 + phase * 3.3;
+      context.fillStyle = index % 5 === 0 ? `rgba(199,255,56,${phase})` : `rgba(238,244,232,${phase * 0.7})`;
+      context.fillRect(x, y, size, size);
     }
+    context.strokeStyle = "rgba(156,123,255,.12)";
+    [80, 150, 240].forEach((radius) => {
+      context.beginPath();
+      context.ellipse(centerX, centerY, radius * 1.65, radius * 0.7, 0, 0, Math.PI * 2);
+      context.stroke();
+    });
+    context.restore();
+  }
+
+  function drawShip(x, y, time) {
+    const glow = context.createRadialGradient(x, y, 4, x, y, 70);
+    glow.addColorStop(0, "rgba(199,255,56,.3)");
+    glow.addColorStop(1, "rgba(199,255,56,0)");
+    context.fillStyle = glow;
+    context.fillRect(x - 75, y - 75, 150, 150);
+
+    context.save();
+    context.translate(x, y + Math.sin(time * 0.006) * 3);
+    context.shadowColor = "#9c7bff";
+    context.shadowBlur = 18;
+    const shipGradient = context.createLinearGradient(-42, 0, 42, 0);
+    shipGradient.addColorStop(0, "#5d43a8");
+    shipGradient.addColorStop(0.5, "#eef4e8");
+    shipGradient.addColorStop(1, "#a9dc27");
+    context.fillStyle = shipGradient;
+    context.beginPath();
+    context.moveTo(0, -42);
+    context.lineTo(42, 30);
+    context.lineTo(14, 20);
+    context.lineTo(0, 34);
+    context.lineTo(-14, 20);
+    context.lineTo(-42, 30);
+    context.closePath();
+    context.fill();
+    context.fillStyle = "#080b0a";
+    context.beginPath();
+    context.ellipse(0, -6, 10, 17, 0, 0, Math.PI * 2);
+    context.fill();
+    context.fillStyle = "#c7ff38";
+    context.fillRect(-20, 29, 8, 18 + Math.random() * 7);
+    context.fillRect(12, 29, 8, 18 + Math.random() * 7);
+    context.restore();
+  }
+
+  function drawFallingWord(word) {
+    const typed = word.slice(0, state.letterIndex);
+    const remaining = word.slice(state.letterIndex);
+    context.save();
+    context.textAlign = "center";
+    context.font = "700 42px monospace";
+    context.shadowBlur = 22;
+    context.shadowColor = "#9c7bff";
+    const typedWidth = context.measureText(typed).width;
+    const remainingWidth = context.measureText(remaining).width;
+    const totalWidth = typedWidth + remainingWidth;
+    const startX = state.wordX - totalWidth / 2;
+    context.textAlign = "left";
+    context.fillStyle = "rgba(146,155,144,.32)";
+    context.fillText(typed, startX, state.wordY);
+    context.fillStyle = "#eef4e8";
+    context.fillText(remaining, startX + typedWidth, state.wordY);
+    if (remaining) {
+      const cursorX = startX + typedWidth + context.measureText(remaining[0]).width / 2;
+      context.fillStyle = "#c7ff38";
+      context.fillRect(cursorX - 14, state.wordY + 10, 28, 3);
+    }
+    context.restore();
+  }
+
+  function handleTyping(key) {
+    if (!state.running || state.level !== 1 || state.wordCompleteAt) return;
+    const word = CODE_WORDS[state.wordIndex];
+    const expected = word[state.letterIndex];
+    if (key.toUpperCase() === expected) {
+      state.blasts.push({ x: canvas.width / 2, y: canvas.height - 90, tx: state.wordX, ty: state.wordY - 12, progress: 0 });
+      state.letterIndex += 1;
+      triggerFeedback(`${expected} · HIT`, "#c7ff38");
+      if (state.letterIndex >= word.length) {
+        state.score += 1;
+        updateScore();
+        createExplosion(state.wordX, state.wordY);
+        triggerFeedback(`${word} · DESTROYED`, "#c7ff38");
+        state.wordCompleteAt = performance.now() + 700;
+      }
+      if (window.matchMedia("(pointer: coarse)").matches) showShooterKeys();
+    } else if (/^[a-z]$/i.test(key)) {
+      state.mistakes += 1;
+      triggerFeedback(`EXPECTED ${expected}`, "#ff6688", true);
+    }
+  }
+
+  function updateBlasts(delta) {
+    state.blasts.forEach((blast) => {
+      blast.progress = Math.min(1, blast.progress + 0.12 * delta);
+      const x = blast.x + (blast.tx - blast.x) * blast.progress;
+      const y = blast.y + (blast.ty - blast.y) * blast.progress;
+      context.strokeStyle = "#c7ff38";
+      context.shadowColor = "#c7ff38";
+      context.shadowBlur = 16;
+      context.lineWidth = 3;
+      context.beginPath();
+      context.moveTo(blast.x, blast.y);
+      context.lineTo(x, y);
+      context.stroke();
+      context.shadowBlur = 0;
+    });
+    state.blasts = state.blasts.filter((blast) => blast.progress < 1);
+  }
+
+  function createExplosion(x, y) {
+    for (let index = 0; index < 24; index += 1) {
+      const angle = (index / 24) * Math.PI * 2;
+      state.sparks.push({ x, y, vx: Math.cos(angle) * (2 + Math.random() * 4), vy: Math.sin(angle) * (2 + Math.random() * 4), life: 1 });
+    }
+  }
+
+  function updateSparks(delta) {
+    state.sparks.forEach((spark) => {
+      spark.x += spark.vx * delta;
+      spark.y += spark.vy * delta;
+      spark.life -= 0.035 * delta;
+      context.globalAlpha = Math.max(0, spark.life);
+      context.fillStyle = Math.random() > 0.45 ? "#c7ff38" : "#9c7bff";
+      context.fillRect(spark.x, spark.y, 4, 4);
+      context.globalAlpha = 1;
+    });
+    state.sparks = state.sparks.filter((spark) => spark.life > 0);
+  }
+
+  function showShooterKeys() {
+    const word = CODE_WORDS[state.wordIndex] || "";
+    const expected = word[state.letterIndex] || "";
+    const alphabet = [...new Set([expected, ...word.split("").reverse()])].slice(0, 5);
+    answerBox.innerHTML = "";
+    answerBox.classList.add("shooter-keys");
+    alphabet.sort(() => Math.random() - 0.5).forEach((letter) => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.textContent = letter;
+      button.addEventListener("click", () => handleTyping(letter));
+      answerBox.append(button);
+    });
+    answerBox.hidden = false;
   }
 
   function showPythonQuestion() {
@@ -420,6 +576,7 @@ export function initMindRunner() {
     context.strokeRect(canvas.width / 2 - 230, 160, 460, 100);
 
     answerBox.innerHTML = "";
+    answerBox.classList.remove("shooter-keys");
     question.options.forEach((option) => {
       const button = document.createElement("button");
       button.type = "button";
@@ -456,7 +613,7 @@ export function initMindRunner() {
     modal.querySelector(".wisdom-text").textContent = stage.wisdom;
     const rewards = [
       `${stage.title} · ${state.results.focus}%`,
-      `${stage.title} · ${state.results.pattern}/8`,
+      `${stage.title} · ${state.results.pattern}/6`,
       `${stage.title} · ${state.results.python}/3`,
     ];
     modal.querySelector(".wisdom-reward").textContent = rewards[state.level];
@@ -499,14 +656,15 @@ export function initMindRunner() {
   canvas.addEventListener("pointermove", mapPointer);
   canvas.addEventListener("pointerdown", (event) => {
     mapPointer(event);
-    jump();
   });
   window.addEventListener("keydown", (event) => {
     if (!state.open) return;
     if (event.key === "Escape") closeGame();
-    if (event.code === "Space") {
+    if (state.level === 1 && /^[a-z]$/i.test(event.key)) {
       event.preventDefault();
-      jump();
+      handleTyping(event.key);
+    } else if (event.code === "Space") {
+      event.preventDefault();
     }
   });
 }
