@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { initMindRunner } from "./game.js?v=6";
+import { initMindRunner } from "./game.js?v=7";
 
 const state = { projects: [], filter: "all", language: "en" };
 const grid = document.querySelector("#project-grid");
@@ -12,6 +12,7 @@ const translations = {
     "nav.projects": "Projects", "nav.skills": "Skills", "nav.about": "About", "nav.contact": "Contact",
     "profile.location": "Europe / Remote", "profile.status": "Available for selected projects",
     "game.play": "Play Mind Runner ↗",
+    "email.copied": "Email copied",
     "case.task": "Task", "case.role": "Role", "case.result": "Result",
     "hero.copy": "I build web products, games and interfaces made to be explored.",
     "hero.button": "Explore<br>projects",
@@ -45,6 +46,7 @@ const translations = {
     "nav.projects": "Проекты", "nav.skills": "Навыки", "nav.about": "Обо мне", "nav.contact": "Контакты",
     "profile.location": "Европа / Удалённо", "profile.status": "Открыт для избранных проектов",
     "game.play": "Играть в Mind Runner ↗",
+    "email.copied": "Email скопирован",
     "case.task": "Задача", "case.role": "Роль", "case.result": "Результат",
     "hero.copy": "Создаю веб-продукты, игры и интерфейсы, которые хочется исследовать.",
     "hero.button": "Смотреть<br>проекты",
@@ -78,6 +80,7 @@ const translations = {
     "nav.projects": "Projekty", "nav.skills": "Umiejętności", "nav.about": "O mnie", "nav.contact": "Kontakt",
     "profile.location": "Europa / Zdalnie", "profile.status": "Dostępny dla wybranych projektów",
     "game.play": "Zagraj w Mind Runner ↗",
+    "email.copied": "Email skopiowany",
     "case.task": "Zadanie", "case.role": "Rola", "case.result": "Rezultat",
     "hero.copy": "Tworzę produkty internetowe, gry i interfejsy, które chce się odkrywać.",
     "hero.button": "Zobacz<br>projekty",
@@ -212,6 +215,39 @@ function setLanguage(language) {
 languageSwitcher.addEventListener("click", (event) => {
   const button = event.target.closest("[data-lang]");
   if (button) setLanguage(button.dataset.lang);
+});
+
+const emailLink = document.querySelector("[data-copy-email]");
+const copyToast = document.querySelector("#copy-toast");
+let copyToastTimer;
+
+async function copyText(value) {
+  if (navigator.clipboard && window.isSecureContext) {
+    await navigator.clipboard.writeText(value);
+    return;
+  }
+  const textarea = document.createElement("textarea");
+  textarea.value = value;
+  textarea.setAttribute("readonly", "");
+  textarea.style.position = "fixed";
+  textarea.style.opacity = "0";
+  document.body.append(textarea);
+  textarea.select();
+  document.execCommand("copy");
+  textarea.remove();
+}
+
+emailLink?.addEventListener("click", async (event) => {
+  event.preventDefault();
+  try {
+    await copyText(emailLink.dataset.copyEmail);
+    copyToast.querySelector("span").textContent = translations[state.language]["email.copied"];
+    copyToast.classList.add("visible");
+    clearTimeout(copyToastTimer);
+    copyToastTimer = setTimeout(() => copyToast.classList.remove("visible"), 2400);
+  } catch {
+    window.location.href = emailLink.href;
+  }
 });
 
 function renderProjects() {
